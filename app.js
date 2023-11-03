@@ -3,7 +3,14 @@ const app = express()
 const dotenv = require('dotenv')
 const bodyParser = require('body-parser');
 const sequelize = require('./config/sequalize')
-app.use(bodyParser.urlencoded({extended: false}))
+const cors = require('cors')
+const helmet = require('helmet');
+
+app.use(cors());
+app.use(helmet());
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 dotenv.config()
 
@@ -12,7 +19,7 @@ sequelize.authenticate().then(() => {
  }).catch((error) => {
     console.error('Unable to connect to the database: ', error);
  });
- 
+
 const port = process.env.PORT
 
 const userRoutes = require('./routes/UserRoutes')

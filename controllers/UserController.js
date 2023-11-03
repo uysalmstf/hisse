@@ -3,7 +3,21 @@ function login(req, res) {
 }
 
 function create(req, res) {
-    console.log("hello create")
+    const data = req.body
+    if (data.email == null) {
+        res.json({ 
+            error: true,
+            message: "Email Boş Bırakılamaz"
+          }); 
+    }
+    if (data.pass == null) {
+        res.json({ 
+            error: true,
+            message: "Email Boş Bırakılamaz"
+          }); 
+    }
+
+    
 }
 
 module.exports = {
