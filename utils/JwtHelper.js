@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 function generateJWTToken(pass) {
     let data = { 
         time: Date(), 
-        userId: 12, 
+        userId: pass, 
     } 
   
     const token = jwt.sign(data, process.env.TOKEN_SECRET); 
