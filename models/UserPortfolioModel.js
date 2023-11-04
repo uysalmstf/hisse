@@ -9,4 +9,5 @@ const UserPortfolio = sequelize.define("user_portfolio", {
     },
  });
 
+
  module.exports = UserPortfolio

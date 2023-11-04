@@ -23,9 +23,11 @@ const port = process.env.PORT
 
 const userRoutes = require('./routes/UserRoutes')
 const userPortfolioRoutes = require('./routes/UserPortfolioRoutes')
+const shareRoutes = require('./routes/ShareRoutes')
 
 app.use(userRoutes)
 app.use(userPortfolioRoutes)
+app.use(shareRoutes)
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
