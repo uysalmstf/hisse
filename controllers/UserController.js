@@ -24,8 +24,6 @@ async function create(req, res) {
 
     let md5Pass = md5.createMD5(data.pass);
 
-    console.log(md5Pass)
-
     const user = await User.create({
         email: data.email,
         pass: md5Pass,
