@@ -1,7 +1,6 @@
 const express = require('express')
 const app = express()
 const dotenv = require('dotenv')
-const bodyParser = require('body-parser');
 const sequelize = require('./config/sequalize')
 const cors = require('cors')
 const helmet = require('helmet');
@@ -23,8 +22,10 @@ sequelize.authenticate().then(() => {
 const port = process.env.PORT
 
 const userRoutes = require('./routes/UserRoutes')
+const userPortfolioRoutes = require('./routes/UserPortfolioRoutes')
 
 app.use(userRoutes)
+app.use(userPortfolioRoutes)
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

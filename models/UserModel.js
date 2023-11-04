@@ -1,6 +1,9 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize = require('../config/sequalize')
 
+const UserPortfolio = require('./UserPortfolioModel')
+
+
 const User = sequelize.define("user", {
     email: {
       type: DataTypes.STRING,
@@ -10,5 +13,7 @@ const User = sequelize.define("user", {
       type: DataTypes.STRING,
     }
  });
+
+ User.hasOne(UserPortfolio);
 
  module.exports = User
