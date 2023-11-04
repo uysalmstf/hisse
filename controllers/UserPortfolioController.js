@@ -11,7 +11,7 @@ async function create(req, res) {
             error: true,
             message: "Tekrar login olunuz"
           }); 
-    }æ
+    }
 
     let isPortfolioExist = await UserPortfolio.findOne({
         where: {
