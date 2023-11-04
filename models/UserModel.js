@@ -1,19 +1,13 @@
 const { Sequelize, DataTypes } = require("sequelize");
+const sequelize = require('../config/sequalize')
 
 const User = sequelize.define("user", {
-    id: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
     email: {
       type: DataTypes.STRING,
       allowNull: false
     },
     pass: {
       type: DataTypes.STRING,
-    },
-    created_at: {
-      type: DataTypes.DATEONLY,
     }
  });
 
