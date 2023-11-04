@@ -24,6 +24,28 @@ async function create(req, res) {
 
     let md5Pass = md5.createMD5(data.pass);
 
+    const userExist = await User.findOne({
+        where: {
+            email : data.email
+        }
+    }).then(res => {
+        if (res.id > 0) {
+            return 1
+        }
+        return 0
+    }).catch((error) => {
+        console.error('Failed to retrieve data : ', error);
+
+        return -1
+    });
+
+    if (userExist != 0) {
+        res.status(200).json({ 
+            error: true,
+            message: "Aynı emaile sahip kullanıcı vardır. Login Olunuz"
+          }); 
+    }
+
     const user = await User.create({
         email: data.email,
         pass: md5Pass,
