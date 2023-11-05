@@ -5,21 +5,24 @@ const {
 } = require('../models/AllModels')
 
 async function findSharePortfolio(userPortfolioId, share_id) {
-    let portfolioShareExist2
-    portfolioShareExist = await SharePortfolio.findOne({
-        where: {
-            userPortfolioId: userPortfolioId,
-            shareId: share_id
-        }
-    }).then((res) => {
-        portfolioShareExist = res.dataValues
-    }).catch((err) => {
-        console.log("shareportfolio find : " + err)
+    let portfolioShareExist = await SharePortfolio.findOne({
+            where: {
+                userPortfolioId: userPortfolioId,
+                shareId: share_id
+            }
+        }).then((res) => {
+            if (res != null) {
+                return res.dataValues
+            }
 
-        return null
-    })
+            return null
+        }).catch((err) => {
+            console.log("shareportfolio find : " + err)
 
-    return portfolioShareExist2
+            return null
+        })
+
+    return portfolioShareExist
 }
 
 async function create(saveParams) {

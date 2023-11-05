@@ -5,8 +5,6 @@ const SharePortfolioService = require('../services/SharePortfolioService')
 const SharePortfolioLogsService = require('../services/SharePortfolioLogsService')
 const ResponseHelper = require('../utils/ResponseHelper')
 
-
-
 async function list(req, res) {
 
     const token = req.headers["x-access-token"];
@@ -103,7 +101,7 @@ async function buy(req, res) {
         })
     }
 
-   if (shareSave2) {
+   if (shareSave) {
 
         let shareUpdate = await ShareService.update({
             count: share.count - data.count
@@ -195,7 +193,7 @@ async function sell(req, res) {
 
             let shareUpdate = await ShareService.update(
                 {count: share.count + data.count}, 
-            { id: data.share_id } 
+                { id: data.share_id } 
             )
     
             shareLogSave = await SharePortfolioLogsService.create({
@@ -213,7 +211,6 @@ async function sell(req, res) {
     ResponseHelper.prepareReponse(res, true, 'Hisseyi satmak için önce almanız gerekmektedir.')
 
 }
-
 
 module.exports = {
     list,
