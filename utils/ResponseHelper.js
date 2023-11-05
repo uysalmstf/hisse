@@ -6,13 +6,13 @@ function prepareReponse(response, errorStatus, message, data = null) {
     }
     
     if (data == null) {
-        response.json({ 
+       return response.json({ 
             error: errorStatus,
             message: message
         }); 
     } else {
 
-        response.json({ 
+        return response.json({ 
             error: errorStatus,
             message: message,
             data: data
