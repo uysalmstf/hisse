@@ -70,12 +70,15 @@ async function createUser(email, pass) {
 async function findUserPortfolioWithPK(userId) {
     let userPortfolioId = User.findByPk(userId, {
         include: UserPortfolio,
-        }).then((user) => {
-        return user.user_portfolio.id ?? 0;
+        }).then((userPortfolio) => {
+            if (userPortfolio != null && userPortfolio.user_portfolio != null) {
+                return userPortfolio
+            }
+            return null
         }).catch((err) => {
             console.log(err)
 
-            return -1;
+            return null;
         });
 
         return userPortfolioId

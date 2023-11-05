@@ -27,10 +27,8 @@ async function portfolioFinder(userId) {
     return portfolio
 }
 
-async function create(userId) {
-    let portfolio = await UserPortfolio.create({
-        userId: userId,
-    }).then(res => {
+async function create(createData) {
+    let portfolio = await UserPortfolio.create(createData).then(res => {
         if (res == null) {
             return 0
         }
@@ -46,7 +44,26 @@ async function create(userId) {
     return portfolio
 }
 
+async function update(updateParams, whereParams) {
+    let shareUpdate = await UserPortfolio.update(updateParams,
+    { where: whereParams })
+    .then((res) => {
+        if (res != null ) {
+            return true
+        }
+
+        return false
+    }).catch((err) => {
+        console.log("shareportfolio create : " + err)
+
+        return false
+    })
+
+    return shareUpdate
+}
+
 module.exports = {
     portfolioFinder,
-    create
+    create,
+    update
 }

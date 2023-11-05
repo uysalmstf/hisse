@@ -2,6 +2,7 @@ const jwt = require('../utils/JwtHelper')
 const UserService = require('../services/UserServices')
 const ShareService = require('../services/ShareService')
 const SharePortfolioService = require('../services/SharePortfolioService')
+const UserPortfolioService = require('../services/UserPortfolioService')
 const SharePortfolioLogsService = require('../services/SharePortfolioLogsService')
 const ResponseHelper = require('../utils/ResponseHelper')
 
@@ -56,14 +57,17 @@ async function buy(req, res) {
     }
 
     let userPortfolioId = await UserService.findUserPortfolioWithPK(reqData.userId)
-
-    if (userPortfolioId <= 0) {
+    
+    if (userPortfolioId  == null) {
         ResponseHelper.prepareReponse(res, true, 'Portföy Oluşturulmamış')
 
     }    
 
     let share = await ShareService.findOne(data.share_id)
 
+    if (share == null) {
+        ResponseHelper.prepareReponse(res, true, 'Hisse Bulunamadı')
+    }
     if (share.count <= 0) {
 
         ResponseHelper.prepareReponse(res, true, 'Hisse yeterli miktarda yoktur')
@@ -79,14 +83,16 @@ async function buy(req, res) {
         ResponseHelper.prepareReponse(res, true, 'Daha az sayıda hisse almalısınız')
     }
 
-    let portfolioShareExist2 = await SharePortfolioService.findSharePortfolio(userPortfolioId, data.share_id)
+
+    let portfolioShareExist2 = await SharePortfolioService.findSharePortfolio(userPortfolioId.user_portfolio.id, data.share_id)
 
     let shareSave
     let shareSave2
 
+
     if (portfolioShareExist2 != null) {
         shareSave = await SharePortfolioService.update({
-            userPortfolioId: userPortfolioId,
+            userPortfolioId: userPortfolioId.user_portfolio.id,
             shareId: data.share_id,
             count: portfolioShareExist2.count + data.count
         },
@@ -95,7 +101,7 @@ async function buy(req, res) {
     } else {
 
         shareSave = await SharePortfolioService.create({
-            userPortfolioId: userPortfolioId,
+            userPortfolioId: userPortfolioId.user_portfolio.id,
             shareId: data.share_id,
             count: data.count
         })
@@ -107,13 +113,18 @@ async function buy(req, res) {
             count: share.count - data.count
         },
          { id: data.share_id })
-       
+
+        let sharePortfolioBudgetSave = await UserPortfolioService.update(
+            {budget:userPortfolioId.user_portfolio.budget - (data.count * share.buy_price)},
+            {id: userPortfolioId.user_portfolio.id}
+        ) 
 
         let shareLogSave = await SharePortfolioLogsService.create({
             desc: "Satın alma",
             count: data.count,
             userId: reqData.userId,
-            shareId: data.share_id
+            shareId: data.share_id,
+            price: data.count * share.buy_price
         })
 
         ResponseHelper.prepareReponse(res, false, 'Satın Alma Tamamlandı')
@@ -146,21 +157,27 @@ async function sell(req, res) {
 
     let userPortfolioId = await UserService.findUserPortfolioWithPK(reqData.userId)
 
-    if (userPortfolioId <= 0) {
+    if (userPortfolioId == null) {
         ResponseHelper.prepareReponse(res, true, 'Portföy Oluşturmalısınız')
 
     }    
 
     let share = await ShareService.findOne(data.share_id)
 
+    if (share == null) {
+
+        ResponseHelper.prepareReponse(res, true, 'Hisse bulunamadı')
+
+    }
+
     if (share.count <= 0) {
 
         ResponseHelper.prepareReponse(res, true, 'Hisse yeterli miktarda yoktur')
     }
     
-    let sharePortfolioExist = await SharePortfolioService.findSharePortfolio(userPortfolioId, data.share_id)
+    let sharePortfolioExist = await SharePortfolioService.findSharePortfolio(userPortfolioId.user_portfolio.id, data.share_id)
 
-    if (sharePortfolioExist.id > 0) {
+    if (sharePortfolioExist != null) {
 
         if (sharePortfolioExist.count < data.count) {
 
@@ -168,24 +185,31 @@ async function sell(req, res) {
 
         } else if (sharePortfolioExist.count == data.count) {
             
+            budget = parseFloat(userPortfolioId.user_portfolio.budget) + parseFloat(data.count * share.sell_price)
             isDeleted = await SharePortfolioService.del(sharePortfolioExist.id)
 
             shareUpdate = await ShareService.update(
                 {count: share.count + data.count},
                 { id: data.share_id }
             )
+
+            let sharePortfolioBudgetSave = await UserPortfolioService.update(
+                {budget: budget},
+                {id: userPortfolioId.user_portfolio.id}
+            ) 
     
             shareLogSave = await SharePortfolioLogsService.create({
                 desc: "Satma",
                 count: data.count,
                 userId: reqData.userId,
-                shareId: data.share_id
+                shareId: data.share_id,
+                price: data.count * share.sell_price
             })
     
             ResponseHelper.prepareReponse(res, false, 'Satma İşlemi tamamlandı')
               
         } else {
-
+            budget = parseFloat(userPortfolioId.user_portfolio.budget) + parseFloat(data.count * share.sell_price)
             let isUpdated = await SharePortfolioService.update(
                 {count: sharePortfolioExist.count - data.count},
                 {id: sharePortfolioExist.id}
@@ -195,12 +219,18 @@ async function sell(req, res) {
                 {count: share.count + data.count}, 
                 { id: data.share_id } 
             )
+
+            let sharePortfolioBudgetSave = await UserPortfolioService.update(
+                {budget: budget},
+                {id: userPortfolioId.user_portfolio.id}
+            ) 
     
             shareLogSave = await SharePortfolioLogsService.create({
                 desc: "Satma",
                 count: data.count,
                 userId: reqData.userId,
-                shareId: data.share_id
+                shareId: data.share_id,
+                price: data.count * share.sell_price
             })
 
             ResponseHelper.prepareReponse(res, false, 'Satma İşlemi tamamlandı')

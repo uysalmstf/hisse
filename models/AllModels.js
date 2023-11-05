@@ -26,6 +26,9 @@ const Share = sequelize.define("share", {
       type: DataTypes.INTEGER,
       allowNull: false
     },
+    budget: {
+      type: DataTypes.DECIMAL
+    }
  });
 
  const SharePortfolio = sequelize.define("share_portfolio", {
@@ -50,11 +53,15 @@ const Share = sequelize.define("share", {
   desc: {
     type: DataTypes.TEXT
   },
+  price: {
+    type: DataTypes.DECIMAL
+  }
 });
 
  Share.belongsToMany(UserPortfolio, {through: SharePortfolio})
  UserPortfolio.belongsToMany(Share, {through: SharePortfolio})
  Share.hasMany(SharePortfolioLogs)
+ 
  module.exports = {
     Share,
     UserPortfolio,
