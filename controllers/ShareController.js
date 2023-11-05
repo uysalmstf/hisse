@@ -222,7 +222,7 @@ async function sell(req, res) {
     const token = req.headers["x-access-token"];
     const reqData = jwt.decodeHeader(token)
     const data = req.body
-
+    
     if (reqData.userId == null) {
         res.status(200).json({ 
             error: true,
@@ -230,7 +230,21 @@ async function sell(req, res) {
           }); 
     }
 
-    let userPortfolioId = User.findByPk(reqData.userId, {
+    if (data.share_id == null) {
+        res.status(200).json({ 
+            error: true,
+            message: "Hisse yollanmamış"
+          }); 
+    }
+
+    if (data.count == null) {
+        res.status(200).json({ 
+            error: true,
+            message: "Hisse Adedi yollanmamış"
+          }); 
+    }
+
+    let userPortfolioId = await User.findByPk(reqData.userId, {
         include: UserPortfolio,
         }).then((user) => {
         return user.user_portfolio.id ?? 0;
@@ -247,7 +261,140 @@ async function sell(req, res) {
           }); 
     }    
 
+    let shareCount = await Share.findOne({
+        where: {
+            id: data.share_id
+        }
+    }).then((share) => {
+        return share.count ?? 0;
+        }).catch((err) => {
+            console.log(err)
 
+            return -1;
+        });
+
+    if (shareCount <= 0) {
+        res.status(200).json({ 
+            error: true,
+            message: "Hisse yeterli miktarda yoktur"
+          }); 
+    }
+    
+    let sharePortfolioExist = await SharePortfolio.findOne({
+        where: {
+            userPortfolioId: userPortfolioId,
+            shareId: data.share_id
+        }
+    }).then((res) => {
+        return res.dataValues
+    }).catch((err) => {
+        console.log(err)
+
+        return -1;
+    });
+
+    if (sharePortfolioExist.id > 0) {
+        
+
+
+        if (sharePortfolioExist.count < data.count) {
+            res.status(200).json({ 
+                error: true,
+                message: "Hisseyi daha az miktarda satmalısınız"
+              }); 
+        } else if (sharePortfolioExist.count == data.count) {
+            
+            isDeleted = await SharePortfolio.destroy({
+                where: {
+                    id: sharePortfolioExist.id
+                }
+            }).then(() => {
+                return true
+            }).catch((error) => {
+                console.error('Failed to delete record : ', error);
+            });
+
+            shareUpdate = await Share.update({
+                count: shareCount + data.count
+            },
+            { where: { id: data.share_id } })
+            .then((res) => {
+                return res.id ?? 0
+            }).catch((err) => {
+                console.log("shareportfolio create : " + err)
+        
+                return -1
+            })
+    
+            shareLogSave = await SharePortfolioLogs.create({
+                desc: "Satma",
+                count: data.count,
+                userId: reqData.userId,
+                shareId: data.share_id
+            }).then((res) => {
+                return res.id ?? 0
+            }).catch((err) => {
+                console.log("shareportfolio create : " + err)
+        
+                return -1
+            })
+    
+            res.status(200).json({ 
+                error: false,
+                message: "Satma İşlemi tamamlandı"
+              }); 
+              
+        } else {
+
+            isUpdated = await SharePortfolio.update({
+                count: sharePortfolioExist.count - data.count
+            },{
+                where: {
+                    id: sharePortfolioExist.id
+                }
+            }).then((res) => {
+                return true
+            }).catch((error) => {
+                console.error('Failed to delete record : ', error);
+            });
+
+            shareUpdate = await Share.update({
+                count: shareCount + data.count
+            },
+            { where: { id: data.share_id } })
+            .then((res) => {
+                return res.id ?? 0
+            }).catch((err) => {
+                console.log("shareportfolio create : " + err)
+        
+                return -1
+            })
+    
+            shareLogSave = await SharePortfolioLogs.create({
+                desc: "Satma",
+                count: data.count,
+                userId: reqData.userId,
+                shareId: data.share_id
+            }).then((res) => {
+                return res.id ?? 0
+            }).catch((err) => {
+                console.log("shareportfolio create : " + err)
+        
+                return -1
+            })
+
+            res.status(200).json({ 
+                error: false,
+                message: "Satma İşlemi tamamlandı"
+              }); 
+    
+        }
+    }
+
+    res.status(200).json({ 
+        error: true,
+        message: "Hisseyi satmak için önce almanız gerekmektedir."
+      }); 
 }
 
 
