@@ -1,7 +1,7 @@
 const jwt = require('../utils/JwtHelper')
 const md5 = require('../utils/MD5')
 const ResponseHelper = require('../utils/ResponseHelper')
-const User = require('../models/UserModel')
+const UserService = require('../services/UserServices')
 
 async function login(req, res) {
     const data = req.body
@@ -14,21 +14,7 @@ async function login(req, res) {
 
     let md5Pass = md5.createMD5(data.pass);
 
-    const userExist = await User.findOne({
-        where: {
-            email : data.email,
-            pass: md5Pass
-        }
-    }).then(res => {
-        if (res.id > 0) {
-            return res.id
-        }
-        return 0
-    }).catch((error) => {
-        console.error('Failed to retrieve data : ', error);
-
-        return -1
-    });
+    const userExist = await UserService.getUserWithEmailPassword(data.email, md5Pass)
 
     if (userExist > 0) {
 
@@ -52,37 +38,14 @@ async function create(req, res) {
 
     let md5Pass = md5.createMD5(data.pass);
 
-    const userExist = await User.findOne({
-        where: {
-            email : data.email
-        }
-    }).then(res => {
-        if (res.id > 0) {
-            return 1
-        }
-        return 0
-    }).catch((error) => {
-        console.error('Failed to retrieve data : ', error);
-
-        return -1
-    });
+    const userExist = await UserService.getUserWithEmail(data.email)
 
     if (userExist != 0) {
         
         ResponseHelper.prepareReponse(res, true, "Aynı emaile sahip kullanıcı vardır. Login Olunuz")
     }
 
-    const user = await User.create({
-        email: data.email,
-        pass: md5Pass,
-    }).then(res => {
-        return res.id
-    }).catch((error) => {
-        console.error('Failed to create a new record : ', error);
-
-        return 0
-    });
-
+    const user = await UserService.createUser(data.email, md5Pass)
 
     if (user > 0) {
 

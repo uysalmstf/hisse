@@ -1,13 +1,11 @@
 const jwt = require('../utils/JwtHelper')
-const User = require('../models/UserModel')
+const UserService = require('../services/UserServices')
+const ShareService = require('../services/ShareService')
+const SharePortfolioService = require('../services/SharePortfolioService')
+const SharePortfolioLogsService = require('../services/SharePortfolioLogsService')
 const ResponseHelper = require('../utils/ResponseHelper')
 
-const {
-    Share,
-    UserPortfolio,
-    SharePortfolio,
-    SharePortfolioLogs
-} = require('../models/AllModels')
+
 
 async function list(req, res) {
 
@@ -18,15 +16,7 @@ async function list(req, res) {
         ResponseHelper.prepareReponse(res, true, 'Tekrar Login olunuz')
     }
 
-    let userPortfolioId = User.findByPk(reqData.userId, {
-        include: UserPortfolio,
-        }).then((user) => {
-        return user.user_portfolio.id ?? 0;
-        }).catch((err) => {
-            console.log(err)
-
-            return -1;
-        });
+    let userPortfolioId = UserService.findUserPortfolioWithPK(reqData.userId)
 
     if (userPortfolioId <= 0) {
         ResponseHelper.prepareReponse(res, true, 'Portföy Oluşturmalısınız')
@@ -35,18 +25,15 @@ async function list(req, res) {
 
     let shareList = null;
 
-    shareList = await Share.findAll().then((res) => {
-        shareList = res
+    shareList = await ShareService.list()
 
-        return res
-    }).catch((error) => {
-        console.error('Failed to retrieve data : ', error);
+    if (shareList != -1 ) {
+        ResponseHelper.prepareReponse(res, false, 'İşlem Başarılı', shareList)
 
-        return -1
-    });
+    } else {
+        ResponseHelper.prepareReponse(res, true, 'İşlem Başarısız')
 
-    ResponseHelper.prepareReponse(res, false, 'İşlem Başarılı', shareList)
-
+    }
 
 }
 
@@ -70,118 +57,65 @@ async function buy(req, res) {
 
     }
 
-    let userPortfolioId = await User.findByPk(reqData.userId, {
-        include: UserPortfolio,
-        }).then((user) => {
-        return user.user_portfolio.id ?? 0;
-        }).catch((err) => {
-            console.log(err)
-
-            return -1;
-        });
+    let userPortfolioId = await UserService.findUserPortfolioWithPK(reqData.userId)
 
     if (userPortfolioId <= 0) {
         ResponseHelper.prepareReponse(res, true, 'Portföy Oluşturulmamış')
 
     }    
 
-    let shareCount = await Share.findOne({
-        where: {
-            id: data.share_id
-        }
-    }).then((share) => {
-        return share.count ?? 0;
-        }).catch((err) => {
-            console.log(err)
+    let share = await ShareService.findOne(data.share_id)
 
-            return -1;
-        });
-
-    if (shareCount <= 0) {
+    if (share.count <= 0) {
 
         ResponseHelper.prepareReponse(res, true, 'Hisse yeterli miktarda yoktur')
     }    
 
-    if (shareCount < data.count) {
+    if (share.count < data.count) {
 
         ResponseHelper.prepareReponse(res, true, 'Daha az sayıda hisse almalısınız')
     }
 
-    if (shareCount - data.count < 0) {
+    if (share.count - data.count < 0) {
 
         ResponseHelper.prepareReponse(res, true, 'Daha az sayıda hisse almalısınız')
     }
 
-    let portfolioShareExist2
-    portfolioShareExist = await SharePortfolio.findOne({
-        where: {
-            userPortfolioId: userPortfolioId,
-            shareId: data.share_id
-        }
-    }).then((res) => {
-        portfolioShareExist2 = res.dataValues
-    }).catch((err) => {
-        console.log("shareportfolio find : " + err)
+    let portfolioShareExist2 = await SharePortfolioService.findSharePortfolio(userPortfolioId, data.share_id)
 
-        return null
-    })
-
+    let shareSave
     let shareSave2
+
     if (portfolioShareExist2 != null) {
-        shareSave = await SharePortfolio.update({
+        shareSave = await SharePortfolioService.update({
             userPortfolioId: userPortfolioId,
             shareId: data.share_id,
             count: portfolioShareExist2.count + data.count
         },
-        { where: { id: portfolioShareExist2.id } }).then((res) => {
-            shareSave2 =  true
-        }).catch((err) => {
-            console.log("shareportfolio create : " + err)
-    
-            return -1
-        })
-
+        { id: portfolioShareExist2.id })
 
     } else {
 
-        shareSave = await SharePortfolio.create({
+        shareSave = await SharePortfolioService.create({
             userPortfolioId: userPortfolioId,
             shareId: data.share_id,
             count: data.count
-        }).then((res) => {
-            shareSave2 =  true
-        }).catch((err) => {
-            console.log("shareportfolio create : " + err)
-    
-            return false
         })
     }
 
    if (shareSave2) {
 
-        shareUpdate = await Share.update({
-            count: shareCount - data.count
+        let shareUpdate = await ShareService.update({
+            count: share.count - data.count
         },
-        { where: { id: data.share_id } })
-        .then((res) => {
-            return res.id ?? 0
-        }).catch((err) => {
-            console.log("shareportfolio create : " + err)
-    
-            return -1
-        })
+         { id: data.share_id })
+       
 
-        shareLogSave = await SharePortfolioLogs.create({
+        let shareLogSave = await SharePortfolioLogsService.create({
             desc: "Satın alma",
             count: data.count,
             userId: reqData.userId,
             shareId: data.share_id
-        }).then((res) => {
-            return res.id ?? 0
-        }).catch((err) => {
-            console.log("shareportfolio create : " + err)
-    
-            return -1
         })
 
         ResponseHelper.prepareReponse(res, false, 'Satın Alma Tamamlandı')
@@ -212,54 +146,23 @@ async function sell(req, res) {
 
     }
 
-    let userPortfolioId = await User.findByPk(reqData.userId, {
-        include: UserPortfolio,
-        }).then((user) => {
-        return user.user_portfolio.id ?? 0;
-        }).catch((err) => {
-            console.log(err)
-
-            return -1;
-        });
+    let userPortfolioId = await UserService.findUserPortfolioWithPK(reqData.userId)
 
     if (userPortfolioId <= 0) {
         ResponseHelper.prepareReponse(res, true, 'Portföy Oluşturmalısınız')
 
     }    
 
-    let shareCount = await Share.findOne({
-        where: {
-            id: data.share_id
-        }
-    }).then((share) => {
-        return share.count ?? 0;
-        }).catch((err) => {
-            console.log(err)
+    let share = await ShareService.findOne(data.share_id)
 
-            return -1;
-        });
-
-    if (shareCount <= 0) {
+    if (share.count <= 0) {
 
         ResponseHelper.prepareReponse(res, true, 'Hisse yeterli miktarda yoktur')
     }
     
-    let sharePortfolioExist = await SharePortfolio.findOne({
-        where: {
-            userPortfolioId: userPortfolioId,
-            shareId: data.share_id
-        }
-    }).then((res) => {
-        return res.dataValues
-    }).catch((err) => {
-        console.log(err)
-
-        return -1;
-    });
+    let sharePortfolioExist = await SharePortfolioService.findSharePortfolio(userPortfolioId, data.share_id)
 
     if (sharePortfolioExist.id > 0) {
-        
-
 
         if (sharePortfolioExist.count < data.count) {
 
@@ -267,80 +170,39 @@ async function sell(req, res) {
 
         } else if (sharePortfolioExist.count == data.count) {
             
-            isDeleted = await SharePortfolio.destroy({
-                where: {
-                    id: sharePortfolioExist.id
-                }
-            }).then(() => {
-                return true
-            }).catch((error) => {
-                console.error('Failed to delete record : ', error);
-            });
+            isDeleted = await SharePortfolioService.del(sharePortfolioExist.id)
 
-            shareUpdate = await Share.update({
-                count: shareCount + data.count
-            },
-            { where: { id: data.share_id } })
-            .then((res) => {
-                return res.id ?? 0
-            }).catch((err) => {
-                console.log("shareportfolio create : " + err)
-        
-                return -1
-            })
+            shareUpdate = await ShareService.update(
+                {count: share.count + data.count},
+                { id: data.share_id }
+            )
     
-            shareLogSave = await SharePortfolioLogs.create({
+            shareLogSave = await SharePortfolioLogsService.create({
                 desc: "Satma",
                 count: data.count,
                 userId: reqData.userId,
                 shareId: data.share_id
-            }).then((res) => {
-                return res.id ?? 0
-            }).catch((err) => {
-                console.log("shareportfolio create : " + err)
-        
-                return -1
             })
     
             ResponseHelper.prepareReponse(res, false, 'Satma İşlemi tamamlandı')
               
         } else {
 
-            isUpdated = await SharePortfolio.update({
-                count: sharePortfolioExist.count - data.count
-            },{
-                where: {
-                    id: sharePortfolioExist.id
-                }
-            }).then((res) => {
-                return true
-            }).catch((error) => {
-                console.error('Failed to delete record : ', error);
-            });
+            let isUpdated = await SharePortfolioService.update(
+                {count: sharePortfolioExist.count - data.count},
+                {id: sharePortfolioExist.id}
+                )
 
-            shareUpdate = await Share.update({
-                count: shareCount + data.count
-            },
-            { where: { id: data.share_id } })
-            .then((res) => {
-                return res.id ?? 0
-            }).catch((err) => {
-                console.log("shareportfolio create : " + err)
-        
-                return -1
-            })
+            let shareUpdate = await ShareService.update(
+                {count: share.count + data.count}, 
+            { id: data.share_id } 
+            )
     
-            shareLogSave = await SharePortfolioLogs.create({
+            shareLogSave = await SharePortfolioLogsService.create({
                 desc: "Satma",
                 count: data.count,
                 userId: reqData.userId,
                 shareId: data.share_id
-            }).then((res) => {
-                return res.id ?? 0
-            }).catch((err) => {
-                console.log("shareportfolio create : " + err)
-        
-                return -1
             })
 
             ResponseHelper.prepareReponse(res, false, 'Satma İşlemi tamamlandı')

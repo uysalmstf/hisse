@@ -1,10 +1,7 @@
 //const UserPortfolio = require('../models/UserPortfolioModel')
 const jwt = require('../utils/JwtHelper')
-const {
-    Share,
-    UserPortfolio,
-    SharePortfolio
-} = require('../models/AllModels')
+const UserPortfolioService = require('../services/UserPortfolioService')
+const ResponseHelper = require('../utils/ResponseHelper')
 
 
 async function create(req, res) {
@@ -13,66 +10,26 @@ async function create(req, res) {
     const reqData = jwt.decodeHeader(token)
     
     if (reqData.userId == null) {
-        res.status(200).json({ 
-            error: true,
-            message: "Tekrar login olunuz"
-          }); 
+        ResponseHelper.prepareReponse(res, true, 'Tekrar login olunuz')
     }
 
-    let isPortfolioExist = await UserPortfolio.findOne({
-        where: {
-            userId : reqData.userId
-        }
-    }).then(res => {
-
-        if (res== null) {
-            return 0
-        }
-
-        return res.id
-
-    }).catch((error) => {
-        console.error('Failed to retrieve data : ', error);
-
-        return -1
-    });
+    let isPortfolioExist = await UserPortfolioService.portfolioFinder(reqData.userId)
 
     if (isPortfolioExist == 0) {
 
-        let isCreated = await UserPortfolio.create({
-            userId: reqData.userId,
-        }).then(res => {
-            if (res.id == null) {
-                return 0
-            }
-
-            return res.id
-
-        }).catch((error) => {
-            console.error('Failed to creating data : ', error);
-
-            return -1
-        });
+        isCreated = await UserPortfolioService.create(reqData.userId)
 
         if(isCreated > 0) {
 
-            res.status(200).json({ 
-                error: false,
-                message: "Bu hesaba ait portföy hesabı oluşturulmuştur"
-              });
+            ResponseHelper.prepareReponse(res, false, 'Bu hesaba ait portföy hesabı oluşturulmuştur')
+
         }
 
-        res.status(200).json({ 
-            error: true,
-            message: "Bu hesaba ait zaten portföy hesabı oluşturulmuştur"
-          });
+        ResponseHelper.prepareReponse(res, false, 'Bu hesaba ait portföy hesabı zaten oluşturulmuştur')
 
     }
 
-    res.status(200).json({ 
-        error: true,
-        message: "Bu hesaba ait zaten portföy hesabı oluşturulmuştur"
-      });
+    ResponseHelper.prepareReponse(res, false, 'Bu hesaba ait portföy hesabı zaten oluşturulmuştur')
 }
 
 module.exports = {
