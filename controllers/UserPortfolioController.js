@@ -1,5 +1,11 @@
-const UserPortfolio = require('../models/UserPortfolioModel')
+//const UserPortfolio = require('../models/UserPortfolioModel')
 const jwt = require('../utils/JwtHelper')
+const {
+    Share,
+    UserPortfolio,
+    SharePortfolio
+} = require('../models/AllModels')
+
 
 async function create(req, res) {
     

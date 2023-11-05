@@ -1,8 +1,12 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize = require('../config/sequalize')
 
-const UserPortfolio = require('./UserPortfolioModel')
-
+const {
+  Share,
+  UserPortfolio,
+  SharePortfolio,
+  SharePortfolioLogs
+} = require('../models/AllModels')
 
 const User = sequelize.define("user", {
     email: {
@@ -15,5 +19,6 @@ const User = sequelize.define("user", {
  });
 
  User.hasOne(UserPortfolio);
-
+ User.hasMany(SharePortfolioLogs)
+ 
  module.exports = User
