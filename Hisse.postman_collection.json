@@ -1,0 +1,248 @@
+{
+	"info": {
+		"_postman_id": "425ba767-7e6c-4e5f-8073-6bac33f96173",
+		"name": "Hisse",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1301963"
+	},
+	"item": [
+		{
+			"name": "Portfolio",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aW1lIjoiU3VuIE5vdiAwNSAyMDIzIDIzOjI0OjA4IEdNVCswMzAwIChHTVQrMDM6MDApIiwidXNlcklkIjoxLCJpYXQiOjE2OTkyMTU4NDh9.WTi71Sn5Ier7Mjt6J_NNLLlRInjZTJ1Md7P7e98LUSU",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aW1lIjoiU3VuIE5vdiAwNSAyMDIzIDIzOjI0OjA4IEdNVCswMzAwIChHTVQrMDM6MDApIiwidXNlcklkIjoxLCJpYXQiOjE2OTkyMTU4NDh9.WTi71Sn5Ier7Mjt6J_NNLLlRInjZTJ1Md7P7e98LUSU",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"budget\": 100.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/user_portfolio/create",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"user_portfolio",
+								"create"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"a2@b.com\",\n    \"pass\": \"1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/user/create",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"user",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"a@b.com\",\n    \"pass\": \"1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/user/login",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Share",
+			"item": [
+				{
+					"name": "List",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aW1lIjoiU2F0IE5vdiAwNCAyMDIzIDIyOjM3OjMxIEdNVCswMzAwIChHTVQrMDM6MDApIiwidXNlcklkIjoxLCJpYXQiOjE2OTkxMjY2NTF9.kwXhjnacLFALlJfZVXpDQ6vTrAH9pqVPe8hl4pY1_DE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aW1lIjoiU3VuIE5vdiAwNSAyMDIzIDIzOjI0OjA4IEdNVCswMzAwIChHTVQrMDM6MDApIiwidXNlcklkIjoxLCJpYXQiOjE2OTkyMTU4NDh9.WTi71Sn5Ier7Mjt6J_NNLLlRInjZTJ1Md7P7e98LUSU",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:3000/share/list",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"share",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buy",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aW1lIjoiU3VuIE5vdiAwNSAyMDIzIDE5OjA3OjAxIEdNVCswMzAwIChHTVQrMDM6MDApIiwidXNlcklkIjoxLCJpYXQiOjE2OTkyMDA0MjF9.hTaolPMc8Yby0IFBA_6Kx__aoWiShdlCWTgB9F3fpms",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aW1lIjoiU3VuIE5vdiAwNSAyMDIzIDIzOjI0OjA4IEdNVCswMzAwIChHTVQrMDM6MDApIiwidXNlcklkIjoxLCJpYXQiOjE2OTkyMTU4NDh9.WTi71Sn5Ier7Mjt6J_NNLLlRInjZTJ1Md7P7e98LUSU",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"share_id\": 4,\n    \"count\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/share/buy",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"share",
+								"buy"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sell",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aW1lIjoiU3VuIE5vdiAwNSAyMDIzIDE5OjA3OjAxIEdNVCswMzAwIChHTVQrMDM6MDApIiwidXNlcklkIjoxLCJpYXQiOjE2OTkyMDA0MjF9.hTaolPMc8Yby0IFBA_6Kx__aoWiShdlCWTgB9F3fpms",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aW1lIjoiU3VuIE5vdiAwNSAyMDIzIDIzOjI0OjA4IEdNVCswMzAwIChHTVQrMDM6MDApIiwidXNlcklkIjoxLCJpYXQiOjE2OTkyMTU4NDh9.WTi71Sn5Ier7Mjt6J_NNLLlRInjZTJ1Md7P7e98LUSU",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"share_id\": 4,\n    \"count\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/share/sell",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"share",
+								"sell"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
