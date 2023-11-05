@@ -1,6 +1,7 @@
 const jwt = require('../utils/JwtHelper')
 const User = require('../models/UserModel')
-//const UserPortfolio = require('../models/UserPortfolioModel')
+const ResponseHelper = require('../utils/ResponseHelper')
+
 const {
     Share,
     UserPortfolio,
@@ -8,18 +9,13 @@ const {
     SharePortfolioLogs
 } = require('../models/AllModels')
 
-//const SharePortfolio = require('../models/SharePortfolioModel')
-
 async function list(req, res) {
 
     const token = req.headers["x-access-token"];
     const reqData = jwt.decodeHeader(token)
     
     if (reqData.userId == null) {
-        res.status(200).json({ 
-            error: true,
-            message: "Tekrar login olunuz"
-          }); 
+        ResponseHelper.prepareReponse(res, true, 'Tekrar Login olunuz')
     }
 
     let userPortfolioId = User.findByPk(reqData.userId, {
@@ -33,10 +29,8 @@ async function list(req, res) {
         });
 
     if (userPortfolioId <= 0) {
-        res.status(200).json({ 
-            error: true,
-            message: "Portföy oluşturmalısınız"
-          }); 
+        ResponseHelper.prepareReponse(res, true, 'Portföy Oluşturmalısınız')
+
     }    
 
     let shareList = null;
@@ -51,10 +45,8 @@ async function list(req, res) {
         return -1
     });
 
-    res.status(200).json({ 
-        error: false,
-        message: shareList
-      }); 
+    ResponseHelper.prepareReponse(res, false, 'İşlem Başarılı', shareList)
+
 
 }
 
@@ -64,24 +56,18 @@ async function buy(req, res) {
     const data = req.body
     
     if (reqData.userId == null) {
-        res.status(200).json({ 
-            error: true,
-            message: "Tekrar login olunuz"
-          }); 
+        ResponseHelper.prepareReponse(res, true, 'Tekrar Login olunuz')
+
     }
 
     if (data.share_id == null) {
-        res.status(200).json({ 
-            error: true,
-            message: "Hisse yollanmamış"
-          }); 
+        ResponseHelper.prepareReponse(res, true, 'Hisse Yollanmamış')
+
     }
 
     if (data.count == null) {
-        res.status(200).json({ 
-            error: true,
-            message: "Hisse Adedi yollanmamış"
-          }); 
+        ResponseHelper.prepareReponse(res, true, 'Hisse Adedi Yollanmamış')
+
     }
 
     let userPortfolioId = await User.findByPk(reqData.userId, {
@@ -95,10 +81,8 @@ async function buy(req, res) {
         });
 
     if (userPortfolioId <= 0) {
-        res.status(200).json({ 
-            error: true,
-            message: "Portföy oluşturmalısınız"
-          }); 
+        ResponseHelper.prepareReponse(res, true, 'Portföy Oluşturulmamış')
+
     }    
 
     let shareCount = await Share.findOne({
@@ -114,24 +98,18 @@ async function buy(req, res) {
         });
 
     if (shareCount <= 0) {
-        res.status(200).json({ 
-            error: true,
-            message: "Hisse yeterli miktarda yoktur"
-          }); 
+
+        ResponseHelper.prepareReponse(res, true, 'Hisse yeterli miktarda yoktur')
     }    
 
     if (shareCount < data.count) {
-        res.status(200).json({ 
-            error: true,
-            message: "Daha az sayıda hisse almalısınız"
-          }); 
+
+        ResponseHelper.prepareReponse(res, true, 'Daha az sayıda hisse almalısınız')
     }
 
     if (shareCount - data.count < 0) {
-        res.status(200).json({ 
-            error: true,
-            message: "Daha az sayıda hisse almalısınız"
-          }); 
+
+        ResponseHelper.prepareReponse(res, true, 'Daha az sayıda hisse almalısınız')
     }
 
     let portfolioShareExist2
@@ -180,8 +158,6 @@ async function buy(req, res) {
     }
 
    if (shareSave2) {
-    
-        //TODO: add transaction log
 
         shareUpdate = await Share.update({
             count: shareCount - data.count
@@ -208,11 +184,7 @@ async function buy(req, res) {
             return -1
         })
 
-        res.status(200).json({ 
-            error: false,
-            message: "Satın Alma Tamamlandı"
-          }); 
-
+        ResponseHelper.prepareReponse(res, false, 'Satın Alma Tamamlandı')
    }
 
 
@@ -224,24 +196,20 @@ async function sell(req, res) {
     const data = req.body
     
     if (reqData.userId == null) {
-        res.status(200).json({ 
-            error: true,
-            message: "Tekrar login olunuz"
-          }); 
+
+        ResponseHelper.prepareReponse(res, true, 'Tekrar login olunuz')
+
     }
 
     if (data.share_id == null) {
-        res.status(200).json({ 
-            error: true,
-            message: "Hisse yollanmamış"
-          }); 
+
+        ResponseHelper.prepareReponse(res, true, 'Hisse yollanmamış')
+
     }
 
     if (data.count == null) {
-        res.status(200).json({ 
-            error: true,
-            message: "Hisse Adedi yollanmamış"
-          }); 
+        ResponseHelper.prepareReponse(res, true, 'Hisse Adedi yollanmamış')
+
     }
 
     let userPortfolioId = await User.findByPk(reqData.userId, {
@@ -255,10 +223,8 @@ async function sell(req, res) {
         });
 
     if (userPortfolioId <= 0) {
-        res.status(200).json({ 
-            error: true,
-            message: "Portföy oluşturmalısınız"
-          }); 
+        ResponseHelper.prepareReponse(res, true, 'Portföy Oluşturmalısınız')
+
     }    
 
     let shareCount = await Share.findOne({
@@ -274,10 +240,8 @@ async function sell(req, res) {
         });
 
     if (shareCount <= 0) {
-        res.status(200).json({ 
-            error: true,
-            message: "Hisse yeterli miktarda yoktur"
-          }); 
+
+        ResponseHelper.prepareReponse(res, true, 'Hisse yeterli miktarda yoktur')
     }
     
     let sharePortfolioExist = await SharePortfolio.findOne({
@@ -298,10 +262,9 @@ async function sell(req, res) {
 
 
         if (sharePortfolioExist.count < data.count) {
-            res.status(200).json({ 
-                error: true,
-                message: "Hisseyi daha az miktarda satmalısınız"
-              }); 
+
+            ResponseHelper.prepareReponse(res, true, 'Hisseyi daha az miktarda satmalısınız')
+
         } else if (sharePortfolioExist.count == data.count) {
             
             isDeleted = await SharePortfolio.destroy({
@@ -339,10 +302,7 @@ async function sell(req, res) {
                 return -1
             })
     
-            res.status(200).json({ 
-                error: false,
-                message: "Satma İşlemi tamamlandı"
-              }); 
+            ResponseHelper.prepareReponse(res, false, 'Satma İşlemi tamamlandı')
               
         } else {
 
@@ -383,18 +343,13 @@ async function sell(req, res) {
                 return -1
             })
 
-            res.status(200).json({ 
-                error: false,
-                message: "Satma İşlemi tamamlandı"
-              }); 
+            ResponseHelper.prepareReponse(res, false, 'Satma İşlemi tamamlandı')
     
         }
     }
 
-    res.status(200).json({ 
-        error: true,
-        message: "Hisseyi satmak için önce almanız gerekmektedir."
-      }); 
+    ResponseHelper.prepareReponse(res, true, 'Hisseyi satmak için önce almanız gerekmektedir.')
+
 }
 
 

@@ -1,21 +1,15 @@
 const jwt = require('../utils/JwtHelper')
 const md5 = require('../utils/MD5')
-const DateHelper = require('../utils/DateHelper')
+const ResponseHelper = require('../utils/ResponseHelper')
 const User = require('../models/UserModel')
 
 async function login(req, res) {
     const data = req.body
     if (data.email == null) {
-        res.status(200).json({ 
-            error: true,
-            message: "Email Boş Bırakılamaz"
-          }); 
+        ResponseHelper.prepareReponse(res, true, "Email Boş Bırakılamaz")
     }
     if (data.pass == null) {
-        res.status(200).json({ 
-            error: true,
-            message: "Şifre Boş Bırakılamaz"
-          }); 
+        ResponseHelper.prepareReponse(res, true, "Şifre Boş Bırakılamaz")
     }
 
     let md5Pass = md5.createMD5(data.pass);
@@ -37,32 +31,23 @@ async function login(req, res) {
     });
 
     if (userExist > 0) {
-        res.status(200).json({ 
-            error: false,
-            message: "Login Başarılı",
-            token: jwt.generateJWTToken(userExist)
-          }); 
+
+           let token = jwt.generateJWTToken(userExist)
+           ResponseHelper.prepareReponse(res, false, "Login Başarılı", token)
     }
 
-    res.status(200).json({ 
-        error: true,
-        message: "Login Başarısız",
-      }); 
+    ResponseHelper.prepareReponse(res, true, "Login Başarısız")
 }
 
 async function create(req, res) {
     const data = req.body
     if (data.email == null) {
-        res.status(200).json({ 
-            error: true,
-            message: "Email Boş Bırakılamaz"
-          }); 
+        ResponseHelper.prepareReponse(res, true, "Email Boş Bırakılamaz")
+ 
     }
     if (data.pass == null) {
-        res.status(200).json({ 
-            error: true,
-            message: "Şifre Boş Bırakılamaz"
-          }); 
+        ResponseHelper.prepareReponse(res, true, "Şifre Boş Bırakılamaz")
+
     }
 
     let md5Pass = md5.createMD5(data.pass);
@@ -83,10 +68,8 @@ async function create(req, res) {
     });
 
     if (userExist != 0) {
-        res.status(200).json({ 
-            error: true,
-            message: "Aynı emaile sahip kullanıcı vardır. Login Olunuz"
-          }); 
+        
+        ResponseHelper.prepareReponse(res, true, "Aynı emaile sahip kullanıcı vardır. Login Olunuz")
     }
 
     const user = await User.create({
@@ -102,16 +85,12 @@ async function create(req, res) {
 
 
     if (user > 0) {
-        res.status(200).json({ 
-            error: false,
-            message: "İşlem Tamamlandı"
-          }); 
+
+        ResponseHelper.prepareReponse(res, true, "Kayıt Olundu")
     }
 
-    res.status(200).json({ 
-        error: true,
-        message: "Kayıt Olunamadı"
-      }); 
+    ResponseHelper.prepareReponse(res, true, "Kayıt Olunamadı")
+
 }
 
 module.exports = {
